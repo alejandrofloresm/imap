@@ -198,7 +198,13 @@ class Message extends Message\Part
         $iterator = new \RecursiveIteratorIterator($this, \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $part) {
             if ($part->getSubtype() == 'HTML') {
-                return $part->getDecodedContent($this->keepUnseen);
+                try {
+                    $content = $part->getDecodedContent($this->keepUnseen);
+                } catch (\Exception $e) {
+                    $content = $part->getContent($this->keepUnseen);
+                }
+
+                return $content;
             }
         }
     }
@@ -213,12 +219,23 @@ class Message extends Message\Part
         $iterator = new \RecursiveIteratorIterator($this, \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $part) {
             if ($part->getSubtype() == 'PLAIN') {
-                return $part->getDecodedContent($this->keepUnseen);
+                try {
+                    $content = $part->getDecodedContent($this->keepUnseen);
+                } catch (\Exception $e) {
+                    $content = $part->getContent($this->keepUnseen);
+                }
+
+                return $content;
             }
         }
 
-        // If message has no parts, return content of message itself.
-        return $this->getDecodedContent($this->keepUnseen);
+        try {
+            $content = $part->getDecodedContent($this->keepUnseen);
+        } catch (\Exception $e) {
+            $content = $part->getContent($this->keepUnseen);
+        }
+
+        return $content;
     }
 
     /**
